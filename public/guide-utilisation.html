@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide d'Utilisation - TontineApp</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    line-height: 1.6;
+    background: #fff;
+    padding: 0;
+  }
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 50px;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Cover page */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #059669 0%, #0d9488 50%, #0369a1 100%);
+    color: white;
+    padding: 60px 40px;
+  }
+  .cover h1 {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+  }
+  .cover .subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-bottom: 40px;
+  }
+  .cover .cover-img {
+    width: 100%;
+    max-width: 700px;
+    border-radius: 16px;
+    margin: 30px 0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .cover .version {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-top: 30px;
+  }
+
+  /* Section styles */
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #10b981;
+    margin-top: 10px;
+  }
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  p {
+    font-size: 15px;
+    color: #334155;
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+  ul, ol {
+    margin-left: 24px;
+    margin-bottom: 16px;
+  }
+  li {
+    font-size: 15px;
+    color: #334155;
+    line-height: 1.8;
+    margin-bottom: 4px;
+  }
+  .img-full {
+    width: 100%;
+    border-radius: 12px;
+    margin: 16px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .img-half {
+    width: 48%;
+    border-radius: 10px;
+    margin: 12px 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .img-row {
+    display: flex;
+    gap: 4%;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+
+  /* Info boxes */
+  .info-box {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .info-box p { margin-bottom: 0; color: #065f46; font-size: 14px; }
+  .info-box strong { color: #047857; }
+
+  .warning-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .warning-box p { margin-bottom: 0; color: #92400e; font-size: 14px; }
+  .warning-box strong { color: #b45309; }
+
+  .tip-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .tip-box p { margin-bottom: 0; color: #1e40af; font-size: 14px; }
+  .tip-box strong { color: #2563eb; }
+
+  /* Table of contents */
+  .toc {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin: 20px 0;
+  }
+  .toc h3 { margin-top: 0; color: #0f172a; }
+  .toc ol { margin-left: 20px; }
+  .toc li { margin-bottom: 8px; font-size: 14px; }
+  .toc a { color: #059669; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Step cards */
+  .step-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+  .step-card .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 10px;
+  }
+  .step-card h4 { display: inline; margin: 0; }
+
+  /* Feature grid */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .feature-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .feature-card .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .feature-card h4 { margin: 0 0 6px 0; }
+  .feature-card p { font-size: 13px; margin: 0; color: #64748b; }
+
+  /* Print button */
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    z-index: 1000;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: #059669; }
+
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  @media print {
+    .print-btn { display: none; }
+    .page { padding: 20px 30px; page-break-after: always; }
+    .cover { min-height: auto; padding: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
+
+<!-- ============ COVER PAGE ============ -->
+<div class="cover">
+  <h1>TontineApp</h1>
+  <p class="subtitle">Guide d'Utilisation Complet</p>
+  <img class="cover-img" src="https://images.pexels.com/photos/27471164/pexels-photo-27471164.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Reunion communautaire">
+  <p style="font-size: 16px; opacity: 0.85; max-width: 600px;">
+    Gestion complete de vos tontines : membres, cotisations, tours, prets, amendes et transferts de caisse
+  </p>
+  <p class="version">Version 1.0 - Septembre 2026</p>
+</div>
+
+<!-- ============ TABLE OF CONTENTS ============ -->
+<div class="page">
+  <h2>Sommaire</h2>
+  <div class="toc">
+    <ol>
+      <li><a href="#intro">Introduction - Qu'est-ce qu'une tontine ?</a></li>
+      <li><a href="#login">Connexion et Inscription</a></li>
+      <li><a href="#dashboard">Tableau de Bord</a></li>
+      <li><a href="#create">Creer une Tontine</a>
+        <ul style="margin-top: 4px;">
+          <li>4.1 Informations generales</li>
+          <li>4.2 Periodicite</li>
+          <li>4.3 Membres et Tours</li>
+          <li>4.4 Categories financieres</li>
+          <li>4.5 Configuration des prets</li>
+          <li>4.6 Amendes</li>
+          <li>4.7 Recapitulatif</li>
+        </ul>
+      </li>
+      <li><a href="#members">Gestion des Membres</a></li>
+      <li><a href="#contributions">Cotisations</a></li>
+      <li><a href="#payouts">Versements et Tours</a></li>
+      <li><a href="#loans">Prets et Remboursements</a></li>
+      <li><a href="#fines">Amendes et Penalites</a></li>
+      <li><a href="#invitations">Invitations</a></li>
+      <li><a href="#transfer">Transfert de Tontine</a></li>
+      <li><a href="#recap">Recapitulatif PDF</a></li>
+      <li><a href="#admin">Regles d'Administration</a></li>
+      <li><a href="#faq">Questions Frequentes</a></li>
+    </ol>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon" style="background:#ecfdf5;color:#059669;">&#128101;</div>
+      <h4>Gestion des membres</h4>
+      <p>Invitez, organisez et gerez les roles de vos membres</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#fef3c7;color:#d97706;">&#128176;</div>
+      <h4>Cotisations</h4>
+      <p>Enregistrez et suivez les cotisations par periode</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#dbeafe;color:#2563eb;">&#128179;</div>
+      <h4>Prets avec interets</h4>
+      <p>Accordez des prets et distribuez les interets</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#fee2e2;color:#dc2626;">&#9878;</div>
+      <h4>Amendes</h4>
+      <p>Configurez et appliquez des penalites</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#e0e7ff;color:#4f46e5;">&#128197;</div>
+      <h4>Transfert de caisse</h4>
+      <p>Reportez les fonds vers une nouvelle tontine</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#f0fdf4;color:#16a34a;">&#128196;</div>
+      <h4>Recapitulatifs PDF</h4>
+      <p>Generez des rapports complets par reunion</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 1. INTRODUCTION ============ -->
+<div class="page" id="intro">
+  <h2>1. Introduction - Qu'est-ce qu'une tontine ?</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/5466800/pexels-photo-5466800.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Concepts financiers">
+
+  <p>
+    Une <strong>tontine</strong> est un systeme d'epargne collectif ou un groupe de personnes
+    cotise regulierement. A chaque periode (le "tour"), l'un des membres recoit l'ensemble
+    des cotisations. Ce systeme existe depuis des siecles en Afrique et dans le monde entier.
+  </p>
+
+  <p>
+    <strong>TontineApp</strong> digitalise ce systeme en offrant une plateforme complete pour :
+  </p>
+
+  <ul>
+    <li><strong>Creer et configurer</strong> des tontines avec des regles personnalisees</li>
+    <li><strong>Gerer les membres</strong> et leurs roles (admin principal, admin secondaire, membre)</li>
+    <li><strong>Enregistrer les cotisations</strong> par categorie et par periode</li>
+    <li><strong>Effectuer les versements</strong> au beneficiaire de chaque tour</li>
+    <li><strong>Accorder des prets</strong> sur la caisse avec taux d'interet configurable</li>
+    <li><strong>Appliquer des amendes</strong> avec differentes modes de prelevement</li>
+    <li><strong>Transferer la caisse</strong> vers une nouvelle tontine a la fin du cycle</li>
+    <li><strong>Generer des recapitulatifs PDF</strong> pour chaque reunion</li>
+  </ul>
+
+  <div class="info-box">
+    <p><strong>Concepts cles :</strong> La <em>cotisation</em> est le montant obligatoire verse a chaque periode.
+    La <em>caisse</em> est le fonds commun alimente par les categories supplementaires.
+    Le <em>tour</em> est la periode ou un membre recoit l'ensemble des cotisations.</p>
+  </div>
+</div>
+
+<!-- ============ 2. LOGIN ============ -->
+<div class="page" id="login">
+  <h2>2. Connexion et Inscription</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/9755383/pexels-photo-9755383.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Epargne et connexion">
+
+  <h3>Premiere connexion</h3>
+  <p>
+    Pour utiliser TontineApp, vous devez disposer d'un compte. La connexion se fait
+    par adresse email et mot de passe. Si vous n'avez pas encore de compte, contactez
+    l'administrateur de votre tontine qui pourra vous inviter.
+  </p>
+
+  <h4>Etapes pour se connecter</h4>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Saisir l'email</h4>
+    <p>Entrez votre adresse email dans le champ prevu a cet effet.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Saisir le mot de passe</h4>
+    <p>Entrez votre mot de passe. Il doit contenir au minimum 6 caracteres.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Se connecter</h4>
+    <p>Cliquez sur le bouton "Se connecter" pour acceder a votre espace.</p>
+  </div>
+
+  <div class="tip-box">
+    <p><strong>Astuce :</strong> Si vous oubliez votre mot de passe, contactez l'administrateur
+    de la tontine. Il peut vous renvoyer une invitation pour rejoindre la tontine.</p>
+  </div>
+
+  <h3>Profil utilisateur</h3>
+  <p>
+    Votre profil comprend votre nom d'utilisateur (username), votre prenom, votre nom
+    et votre email. Ces informations sont visibles par les autres membres de la tontine
+    lors des recherches d'utilisateurs pour les invitations.
+  </p>
+</div>
+
+<!-- ============ 3. DASHBOARD ============ -->
+<div class="page" id="dashboard">
+  <h2>3. Tableau de Bord</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/33175651/pexels-photo-33175651.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Analyse financiere et tableau de bord">
+
+  <p>
+    Le tableau de bord est la page principale de votre tontine. Il offre une vue d'ensemble
+    de la situation financiere et du suivi des tours.
+  </p>
+
+  <h3>Les quatre cartes de statistiques</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon" style="background:#ecfdf5;color:#059669;">&#128101;</div>
+      <h4>Membres</h4>
+      <p>Affiche le nombre total de membres et le nombre de tours completes</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#dbeafe;color:#2563eb;">&#128091;</div>
+      <h4>Caisse</h4>
+      <p>Montant disponible dans la caisse (hors prets actifs)</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#fef3c7;color:#d97706;">&#129512;</div>
+      <h4>Cotisation</h4>
+      <p>Cotisations en attente de versement et nombre de membres ayant paye</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#f0fdf4;color:#16a34a;">&#128176;</div>
+      <h4>Mon total</h4>
+      <p>Vos contributions personnelles dans la caisse</p>
+    </div>
+  </div>
+
+  <h3>Disponible par categorie</h3>
+  <p>
+    Cette section liste toutes les categories financieres de votre tontine avec :
+  </p>
+  <ul>
+    <li>Le montant disponible dans chaque categorie</li>
+    <li>Le total collecte depuis le debut</li>
+    <li>Les montants pretes (en cours de remboursement)</li>
+    <li>Votre solde personnel dans chaque categorie</li>
+  </ul>
+
+  <h3>Calendrier des tours</h3>
+  <p>
+    Le calendrier affiche tous les tours prevus avec leurs dates, les beneficiaires
+    et leur statut (en attente, complete). Le prochain tour est mis en evidence.
+  </p>
+
+  <div class="info-box">
+    <p><strong>Navigation :</strong> Utilisez le menu lateral gauche pour acceder aux
+    differentes sections. Le menu deroulant en haut permet de basculer entre vos tontines.</p>
+  </div>
+</div>
+
+<!-- ============ 4. CREATE TONTINE ============ -->
+<div class="page" id="create">
+  <h2>4. Creer une Tontine</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/6170653/pexels-photo-6170653.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Planification et calendrier">
+
+  <p>
+    La creation d'une tontine se fait via un assistant en 7 etapes. Seul un administrateur
+    peut creer une tontine. Voici le detail de chaque etape.
+  </p>
+
+  <h3>4.1 - Informations generales</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Nom de la tontine</h4>
+    <p>Donnez un nom explicite, par exemple "Tontine Famille 2027".</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Date de debut et de fin</h4>
+    <p>Definissez la periode de la tontine. Le nombre de tours sera calcule
+    automatiquement en fonction de la periodicite choisie.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Transferer une caisse precedente (optionnel)</h4>
+    <p>Si vous avez deja une tontine terminee ou active, vous pouvez transferer
+    sa caisse vers la nouvelle. Les montants disponibles par categorie seront repris.</p>
+  </div>
+
+  <h3>4.2 - Periodicite</h3>
+  <p>Choisissez la frequence des tours de cotisation :</p>
+  <ul>
+    <li><strong>Mensuel :</strong> Un tour par mois. Choisissez quel dimanche du mois
+    (1er, 2eme, 3eme, 4eme ou dernier).</li>
+    <li><strong>Hebdomadaire :</strong> Un tour par semaine. Choisissez le jour de la semaine.</li>
+    <li><strong>Bi-hebdomadaire :</strong> Un tour toutes les deux semaines. Choisissez le jour.</li>
+  </ul>
+
+  <div class="warning-box">
+    <p><strong>Important :</strong> Le nombre de tours calcule doit etre egal au nombre de membres.
+    Si ce n'est pas le cas, un message d'erreur s'affichera et vous ne pourrez pas continuer.</p>
+  </div>
+</div>
+
+<!-- ============ 4.3 MEMBRES & TOURS ============ -->
+<div class="page">
+  <h2>4. Creer une Tontine (suite)</h2>
+
+  <h3>4.3 - Membres et Tours</h3>
+  <img class="img-full" src="https://images.pexels.com/photos/4963359/pexels-photo-4963359.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Partenariat et accord">
+
+  <p>
+    Cette etape est cruciale : vous definissez qui participe a la tontine et dans quel ordre
+    les membres recevront les tours. Vous (admin) etes automatiquement inclus en position 1.
+  </p>
+
+  <h4>Ajouter un membre</h4>
+  <ol>
+    <li>Tapez le nom ou le nom d'utilisateur dans la barre de recherche (minimum 2 caracteres).</li>
+    <li>Les resultats apparaissent automatiquement.</li>
+    <li>Cliquez sur un utilisateur pour l'ajouter a la liste.</li>
+    <li>Reorganisez l'ordre avec les fleches haut/bas. L'ordre determine qui recoit le tour en premier.</li>
+  </ol>
+
+  <div class="info-box">
+    <p><strong>Ordre des tours :</strong> Le membre en position 1 recoit le 1er tour,
+    le membre en position 2 recoit le 2eme tour, etc. Le montant par tour est calcule
+    automatiquement : nombre de membres x montant de la cotisation.</p>
+  </div>
+
+  <h4>Validation du nombre de membres</h4>
+  <p>
+    Un indicateur vert s'affiche lorsque le nombre de membres correspond au nombre de tours.
+    Si les nombres ne correspondent pas, l'indicateur devient rouge et vous ne pouvez pas
+    passer a l'etape suivante.
+  </p>
+
+  <h3>4.4 - Categories financieres</h3>
+  <p>
+    Les categories definissent les differents types de contributions financieres de votre tontine.
+  </p>
+
+  <h4>La categorie Cotisation (obligatoire)</h4>
+  <div class="warning-box">
+    <p><strong>Categorie obligatoire :</strong> La categorie "Cotisation" est presente par defaut.
+    Son montant est fixe et sera reverse integralement au beneficiaire du tour.
+    Ce montant ne reste pas dans la caisse.</p>
+  </div>
+
+  <h4>Categories supplementaires</h4>
+  <p>Vous pouvez ajouter autant de categories supplementaires que necessaire. Pour chaque categorie :</p>
+  <ul>
+    <li><strong>Nom :</strong> Nom de la categorie (ex: "Fonds de secours", "Caisse sociale").</li>
+    <li><strong>Type de montant :</strong>
+      <ul>
+        <li><em>Montant fixe</em> : Tous les membres doivent verser exactement ce montant.</li>
+        <li><em>Montant minimum</em> : Les membres peuvent verser plus que le minimum.</li>
+      </ul>
+    </li>
+    <li><strong>Dans la caisse :</strong> Si coche, le montant alimente la caisse commune.
+    Si non coche, c'est une contribution hors caisse.</li>
+    <li><strong>Cotisation (retrait a tout moment) :</strong> Le membre peut retirer son montant a tout moment.</li>
+    <li><strong>Retrait en fin uniquement :</strong> Le montant ne peut etre retire qu'a la fin de la tontine.</li>
+  </ul>
+
+  <h4>Montant initial par membre</h4>
+  <p>
+    Pour les categories dans la caisse, vous pouvez definir un montant initial different
+    pour chaque membre. Cela est utile lorsque vous transferez des fonds d'une tontine
+    precedente. Vous pouvez aussi importer automatiquement les montants disponibles
+    d'une tontine precedente.
+  </p>
+</div>
+
+<!-- ============ 4.5 LOAN CONFIG & 4.6 FINES ============ -->
+<div class="page">
+  <h2>4. Creer une Tontine (suite)</h2>
+
+  <h3>4.5 - Configuration des prets</h3>
+  <img class="img-full" src="https://images.pexels.com/photos/144233/pexels-photo-144233.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Pieces de monnaie et prets">
+
+  <p>
+    Cette etape permet de configurer le systeme de prets de votre tontine. Elle est optionnelle
+    mais recommandee si vous souhaitez permettre aux membres d'emprunter sur la caisse.
+  </p>
+
+  <h4>Categories source de pret</h4>
+  <p>
+    Selectionnez quelles categories de la caisse peuvent financer des prets. L'ordre
+    de prelevement determine dans quel ordre les fonds seront preleves lorsqu'un pret
+    est accorde. Par exemple, si vous avez "Fonds de secours" en position 1 et "Caisse sociale"
+    en position 2, les prets seront d'abord preleves sur le Fonds de secours.
+  </p>
+
+  <h4>Taux d'interet</h4>
+  <ul>
+    <li><strong>Taux d'interet (%) :</strong> Le pourcentage d'interet applique aux prets.</li>
+    <li><strong>Periode d'interet :</strong> "Par mois" ou "Par 3 mois". Definit comment
+    l'interet est calcule selon la duree du pret.</li>
+    <li><strong>Categorie de destination des interets :</strong> Les interets perçus
+    seront distribues dans cette categorie, repartis proportionnellement entre tous les membres.</li>
+  </ul>
+
+  <h4>Pret sur cotisation en retard</h4>
+  <p>
+    Vous pouvez definir un taux d'interet specifique pour les cotisations en retard
+    qui sont prelevees sous forme de pret. Ce taux s'applique uniquement a ce type de pret.
+  </p>
+
+  <div class="info-box">
+    <p><strong>Calcul des interets :</strong> Interet = Montant du pret x Taux x Nombre de periodes.
+    Par exemple, un pret de 100 000 FCFA a 5% par mois sur 3 mois genere 15 000 FCFA d'interets.</p>
+  </div>
+
+  <h3>4.6 - Amendes</h3>
+  <img class="img-full" src="https://images.pexels.com/photos/1006060/pexels-photo-1006060.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Pieces de monnaie et amendes">
+
+  <p>
+    Cette etape est <strong>optionnelle</strong>. Vous pouvez definir des types d'amendes
+    qui pourront etre appliquees aux membres par l'administrateur.
+  </p>
+
+  <h4>Pour chaque type d'amende</h4>
+  <ul>
+    <li><strong>Nom :</strong> Ex: "Retard", "Absence", "Non-paiement".</li>
+    <li><strong>Montant (FCFA) :</strong> Le montant de l'amende.</li>
+    <li><strong>Mode de prelevement :</strong>
+      <ul>
+        <li><em>En especes</em> : Le membre paie en liquide.</li>
+        <li><em>Sur le compte du membre</em> : Le montant est debite d'une categorie
+        du compte du membre.</li>
+      </ul>
+    </li>
+    <li><strong>Categorie source (pour prelevement sur compte) :</strong> La categorie
+    du compte du membre qui sera debitee.</li>
+    <li><strong>Categorie de destination (redistribution) :</strong> Si definie, le montant
+    de l'amende sera redistribue en parts egales dans cette categorie pour tous les membres.</li>
+  </ul>
+</div>
+
+<!-- ============ 4.7 REVIEW ============ -->
+<div class="page">
+  <h2>4. Creer une Tontine (suite)</h2>
+
+  <h3>4.7 - Recapitulatif</h3>
+  <p>
+    La derniere etape affiche un resume complet de toute la configuration avant la creation
+    definitive de la tontine. Verifiez attentivement tous les elements :
+  </p>
+
+  <ul>
+    <li><strong>Informations generales :</strong> Nom, dates, periodicite, montant de la cotisation.</li>
+    <li><strong>Categories :</strong> Liste de toutes les categories avec leurs parametres.</li>
+    <li><strong>Ordre des tours :</strong> Liste des membres dans l'ordre des tours.</li>
+    <li><strong>Configuration des prets :</strong> Ordre de prelevement, taux d'interet.</li>
+    <li><strong>Amendes :</strong> Liste des types d'amendes configurés.</li>
+  </ul>
+
+  <div class="info-box">
+    <p><strong>Creation :</strong> Cliquez sur "Creer la tontine" pour finaliser. Des invitations
+    seront automatiquement envoyees aux autres membres. Vous serez redirige vers le tableau de bord.</p>
+  </div>
+</div>
+
+<!-- ============ 5. MEMBERS ============ -->
+<div class="page" id="members">
+  <h2>5. Gestion des Membres</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/33175650/pexels-photo-33175650.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Poignee de main et gestion">
+
+  <p>
+    La page Membres permet de gerer les participants de la tontine, d'inviter de nouveaux
+    membres et de nommer des administrateurs.
+  </p>
+
+  <h3>Inviter un membre</h3>
+  <ol>
+    <li>Cliquez sur le bouton "Inviter" (visible uniquement pour les administrateurs).</li>
+    <li>Recherchez un utilisateur par nom, prenom ou nom d'utilisateur.</li>
+    <li>Selectionnez l'utilisateur dans les resultats.</li>
+    <li>Cliquez sur "Envoyer l'invitation".</li>
+  </ol>
+  <p>
+    L'invitation est valable <strong>48 heures</strong>. Si l'utilisateur n'accepte pas
+    dans ce delai, l'invitation expire automatiquement.
+  </p>
+
+  <h3>Roles des membres</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon" style="background:#fef3c7;color:#d97706;">&#128737;</div>
+      <h4>Admin principal</h4>
+      <p>Controle total : enregistre les cotisations, effectue les versements, gere les prets et amendes</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#dbeafe;color:#2563eb;">&#128737;</div>
+      <h4>Admin secondaire</h4>
+      <p>Remplace l'admin principal en cas d'absence prolongee (apres 40 jours)</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background:#ecfdf5;color:#059669;">&#128100;</div>
+      <h4>Membre</h4>
+      <p>Consulte les informations, participe aux cotisations et recoit les tours</p>
+    </div>
+  </div>
+
+  <h3>Nomination des administrateurs</h3>
+  <p>L'administrateur principal peut :</p>
+  <ul>
+    <li><strong>Nommer un admin secondaire :</strong> Cliquez sur l'icone bouclier bleu
+    a cote d'un membre. Un seul admin secondaire peut etre nomme a la fois.</li>
+    <li><strong>Transmettre le role d'admin principal :</strong> Cliquez sur l'icone bouclier vert.
+    Vous deviendrez membre et le membre selectionne deviendra admin principal.</li>
+    <li><strong>Retirer un admin secondaire :</strong> Cliquez sur l'icone bouclier pour
+    redescendre un admin secondaire au rang de membre.</li>
+  </ul>
+
+  <h3>Resume global</h3>
+  <p>
+    Un tableau affiche le solde net de chaque membre par categorie (hors cotisations).
+    Ce tableau permet de voir en un coup d'oeil la situation financiere de chaque membre
+    dans la caisse.
+  </p>
+
+  <h3>Alerte d'absence de l'administrateur</h3>
+  <div class="warning-box">
+    <p><strong>Attention :</strong> Si l'admin principal est absent (pas de connexion)
+    pendant plus de 20 jours, un avertissement s'affiche. Apres 40 jours d'absence,
+    l'admin secondaire est <strong>automatiquement promu</strong> admin principal.</p>
+  </div>
+</div>
+
+<!-- ============ 6. CONTRIBUTIONS ============ -->
+<div class="page" id="contributions">
+  <h2>6. Cotisations</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/9755383/pexels-photo-9755383.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Cotisations et epargne">
+
+  <p>
+    La page Cotisations permet a l'administrateur d'enregistrer les paiements des membres
+    pour chaque periode. Les cotisations sont organisees par date de reunion.
+  </p>
+
+  <h3>Enregistrer une cotisation</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Selectionner la date de cotisation</h4>
+    <p>Choisissez la date correspondant a la reunion. Un indicateur affiche combien de membres
+    ont deja cotise pour cette date.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Selectionner le membre</h4>
+    <p>Seuls les membres n'ayant pas encore cotise pour cette date apparaissent dans la liste.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Saisir les montants par categorie</h4>
+    <p>Les montants fixes sont pre-remplis et non modifiables. Les montants minimum
+    peuvent etre augmentes. Le total s'affiche en bas du formulaire.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">4</span><h4>Enregistrer</h4>
+    <p>Cliquez sur "Enregistrer toutes les cotisations" pour valider.</p>
+  </div>
+
+  <h3>Cotisation en retard prelevee sur forme de pret</h3>
+  <div class="info-box">
+    <p><strong>Fonctionnalite avancee :</strong> Si un membre est en retard de cotisation,
+    l'admin peut cocher "Prelever sur forme de pret". Le montant total de la cotisation
+    sera enregistre comme un pret actif pour ce membre, avec le taux d'interet specifique
+    configure pour les retards. Il faudra choisir la categorie source ou prelever les fonds.</p>
+  </div>
+
+  <h3>Modification des cotisations</h3>
+  <p>
+    L'administrateur peut modifier une cotisation dans les <strong>7 jours</strong> suivant
+    sa saisie. Apres ce delai, la modification n'est plus possible. Seules les categories
+    non-cotisation (caisse) peuvent etre modifiees.
+  </p>
+
+  <h3>Visualisation par periode</h3>
+  <p>
+    Les cotisations sont regroupees par date de reunion. Chaque groupe peut etre deploye
+    pour afficher un tableau detaille avec, pour chaque membre, les montants par categorie
+    et le total. Les totaux par categorie et le total general sont affiches en bas de
+    chaque tableau.
+  </p>
+</div>
+
+<!-- ============ 7. PAYOUTS ============ -->
+<div class="page" id="payouts">
+  <h2>7. Versements et Tours</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/15049146/pexels-photo-15049146.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Monnaie et versements">
+
+  <p>
+    La page Versements est le coeur du systeme de tontine. C'est ici que l'administrateur
+    effectue les versements aux beneficiaires de chaque tour.
+  </p>
+
+  <h3>Prochain tour</h3>
+  <p>
+    Une banniere verte met en evidence le prochain tour a effectuer : le numero du tour,
+    le nom du beneficiaire et le montant attendu (cotisation par membre x nombre de membres).
+  </p>
+
+  <h3>Caisse cotisation par date</h3>
+  <p>
+    Chaque date de reunion est affichee avec :
+  </p>
+  <ul>
+    <li>Le nombre de membres ayant paye / le total des membres</li>
+    <li>Le montant total collecte pour cette date</li>
+    <li>Un indicateur visuel (vert si tous ont paye, orange sinon)</li>
+  </ul>
+
+  <h3>Effectuer un versement</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Verifier que tous les membres ont cotise</h4>
+    <p>Le bouton "Verser" n'est activable que lorsque tous les membres ont paye
+    leur cotisation pour la date selectionnee.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Cliquer sur "Verser"</h4>
+    <p>Le montant total des cotisations est attribue au beneficiaire du tour.
+    Le tour est marque comme complete et passe au tour suivant.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Generer le recapitulatif PDF</h4>
+    <p>Cliquez sur l'icone document pour generer un recapitulatif PDF complet
+    de la reunion (voir section 12).</p>
+  </div>
+
+  <h3>Fin de la tontine</h3>
+  <div class="info-box">
+    <p><strong>Tous les tours completes :</strong> Lorsque tous les tours ont ete verses,
+    une banniere bleue s'affiche proposant de transferer la caisse vers une nouvelle tontine.
+    Voir la section "Transfert de Tontine" pour plus de details.</p>
+  </div>
+</div>
+
+<!-- ============ 8. LOANS ============ -->
+<div class="page" id="loans">
+  <h2>8. Prets et Remboursements</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/5466800/pexels-photo-5466800.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Documents financiers et prets">
+
+  <p>
+    La page Prets permet a l'administrateur d'accorder des prets sur la caisse et
+    d'enregistrer les remboursements. Les interets perçus sont redistribues aux membres.
+  </p>
+
+  <h3>Accorder un pret</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Selectionner le membre emprunteur</h4>
+    <p>Choisissez le membre qui beneficie du pret.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Saisir le montant du pret</h4>
+    <p>Le montant ne peut pas depasser le total disponible dans les categories de pret.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Definir la duree (en mois)</h4>
+    <p>La duree determine le nombre de periodes d'interet.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">4</span><h4>Configurer le taux d'interet</h4>
+    <p>Choisissez le taux et la periode (mensuel ou trimestriel).</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">5</span><h4>Valider le pret</h4>
+    <p>Le pret est automatiquement finance par les categories source dans l'ordre configure.
+    Le montant total a rembourser (capital + interets) s'affiche.</p>
+  </div>
+
+  <h3>Remboursement d'un pret</h3>
+  <p>
+    Le remboursement se fait en un ou plusieurs versements. Le systeme repartit
+    automatiquement le paiement : le capital est rembourse en premier, puis les interets.
+  </p>
+
+  <div class="info-box">
+    <p><strong>Distribution des interets :</strong> Lorsqu'un remboursement inclut des interets,
+    ceux-ci sont distribues proportionnellement dans la categorie de destination, pour tous
+    les membres, selon leur solde dans cette categorie. Si tous les membres ont le meme solde,
+    la repartition est equitable.</p>
+  </div>
+
+  <h3>Suivi des prets</h3>
+  <p>
+    Le tableau des prets affiche pour chaque pret :
+  </p>
+  <ul>
+    <li>L'emprunteur et le montant initial</li>
+    <li>Le montant restant a rembourser (capital et interets)</li>
+    <li>La duree et le taux d'interet</li>
+    <li>Le statut : actif ou rembourse</li>
+    <li>Les sources de financement (categories prelevees)</li>
+  </ul>
+</div>
+
+<!-- ============ 9. FINES ============ -->
+<div class="page" id="fines">
+  <h2>9. Amendes et Penalites</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/1006060/pexels-photo-1006060.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Amendes et monnaie">
+
+  <p>
+    La page Amendes permet a l'administrateur d'appliquer des penalites aux membres
+    selon les types d'amendes configures lors de la creation de la tontine.
+  </p>
+
+  <h3>Appliquer une amende</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Selectionner le membre</h4>
+    <p>Choisissez le membre a qui l'amende s'applique.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Selectionner le type d'amende</h4>
+    <p>Le montant et le mode de prelevement par defaut sont automatiquement remplis.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Choisir le mode de paiement</h4>
+    <p>
+      <strong>En especes :</strong> Le membre paie en liquide. Vous devez selectionner
+      une categorie de destination ou l'amende sera creditee et redistribuee.
+    </p>
+    <p>
+      <strong>Sur le compte du membre :</strong> Le montant est debite d'une categorie
+      du compte du membre. Si le solde est insuffisant, le prelevement est partiel
+      (le reste est considere comme paye en especes).
+    </p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">4</span><h4>Ajouter un motif (optionnel)</h4>
+    <p>Vous pouvez preciser la raison de l'amende.</p>
+  </div>
+
+  <h3>Marquer une amende comme payee</h3>
+  <p>
+    Les amendes sont d'abord creees avec le statut "en attente". L'administrateur doit
+    ensuite cliquer sur "Marquer comme payee" pour confirmer le paiement. Cette action :
+  </p>
+  <ul>
+    <li>Debite le compte du membre (si prelevement sur compte)</li>
+    <li>Redistribue le montant dans la categorie de destination, en parts egales
+    pour tous les membres</li>
+  </ul>
+
+  <h3>Historique des amendes</h3>
+  <p>
+    Les amendes payees sont affichees dans la section "Historique" avec la date de paiement,
+    le membre, le montant et le motif.
+  </p>
+</div>
+
+<!-- ============ 10. INVITATIONS ============ -->
+<div class="page" id="invitations">
+  <h2>10. Invitations</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/4963359/pexels-photo-4963359.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Invitations et accueil">
+
+  <p>
+    La page Invitations regroupe toutes les demandes de rejoindre des tontines que vous
+    avez recues. Un badge dans le menu lateral indique le nombre d'invitations en attente.
+  </p>
+
+  <h3>Accepter une invitation</h3>
+  <ol>
+    <li>Ouvrez la page Invitations depuis le menu lateral.</li>
+    <li>Consultez les invitations en attente (section "En attente").</li>
+    <li>Cliquez sur "Accepter" pour rejoindre la tontine.</li>
+  </ol>
+  <p>
+    Une fois acceptee, la tontine apparait dans votre liste et vous pouvez commencer
+    a participer aux cotisations et aux tours.
+  </p>
+
+  <h3>Refuser une invitation</h3>
+  <p>
+    Cliquez sur "Refuser" pour decliner l'invitation. L'administrateur de la tontine
+    sera informe de votre refus.
+  </p>
+
+  <div class="warning-box">
+    <p><strong>Expiration :</strong> Les invitations expirent automatiquement apres
+    <strong>48 heures</strong>. Si vous ne repondez pas dans ce delai, l'invitation
+    passe au statut "expiree" et vous ne pourrez plus l'accepter.</p>
+  </div>
+
+  <h3>Historique des invitations</h3>
+  <p>
+    Les invitations acceptees, refusees et expirees sont affichees dans la section
+    "Historique" avec leur statut et leur date.
+  </p>
+</div>
+
+<!-- ============ 11. TRANSFER ============ -->
+<div class="page" id="transfer">
+  <h2>11. Transfert de Tontine</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/11773871/pexels-photo-11773871.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Planification et transfert">
+
+  <p>
+    Lorsque tous les tours d'une tontine sont completes, vous pouvez transferer la caisse
+    vers une nouvelle tontine. Cela permet de continuer le cycle d'epargne collective
+    en reprenant les fonds disponibles.
+  </p>
+
+  <h3>Procedure de transfert</h3>
+  <div class="step-card">
+    <span class="step-num">1</span><h4>Configurer la nouvelle tontine</h4>
+    <p>Definissez le nom, les dates, la periodicite et le montant de cotisation de la nouvelle tontine.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span><h4>Selectionner les membres</h4>
+    <p>Recherchez et ajoutez les membres de la nouvelle tontine. Vous etes automatiquement inclus.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">3</span><h4>Choisir le sort des categories</h4>
+    <p>Pour chaque categorie de la caisse, choisissez :</p>
+    <ul>
+      <li><strong>Transferer :</strong> Le montant disponible est reporte dans la nouvelle tontine.</li>
+      <li><strong>Reinitialiser :</strong> La categorie est recree a zero dans la nouvelle tontine.</li>
+      <li><strong>Ne pas reprendre :</strong> La categorie n'est pas recree.</li>
+    </ul>
+  </div>
+  <div class="step-card">
+    <span class="step-num">4</span><h4>Ajouter de nouvelles categories (optionnel)</h4>
+    <p>Vous pouvez ajouter de nouvelles categories pour la nouvelle tontine.</p>
+  </div>
+  <div class="step-card">
+    <span class="step-num">5</span><h4>Valider le transfert</h4>
+    <p>La nouvelle tontine est creee avec les fonds transferes. Les invitations sont envoyees
+    aux nouveaux membres.</p>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Total transfere :</strong> Le montant total des fonds transferes s'affiche
+    en temps reel pendant la configuration. Il correspond a la somme des montants disponibles
+    dans les categories marquees "Transferer".</p>
+  </div>
+</div>
+
+<!-- ============ 12. RECAP PDF ============ -->
+<div class="page" id="recap">
+  <h2>12. Recapitulatif PDF</h2>
+  <img class="img-full" src="https://images.pexels.com/photos/33175673/pexels-photo-33175673.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="Documents et recapitulatif">
+
+  <p>
+    TontineApp permet de generer un recapitulatif PDF complet pour chaque reunion.
+    Ce document peut etre imprime ou partage avec les membres.
+  </p>
+
+  <h3>Comment generer un recapitulatif</h3>
+  <ol>
+    <li>Allez sur la page "Versements & Tours".</li>
+    <li>Chaque periode de cotisation dispose d'une icone document.</li>
+    <li>Cliquez sur cette icone pour ouvrir le recapitulatif dans une nouvelle fenetre.</li>
+    <li>Utilisez la fonction d'impression de votre navigateur (Ctrl+P / Cmd+P) et choisissez
+    "Enregistrer en PDF" comme imprimante.</li>
+  </ol>
+
+  <h3>Contenu du recapitulatif</h3>
+  <p>Le PDF genere contient les sections suivantes :</p>
+  <ul>
+    <li><strong>En-tete :</strong> Nom de la tontine et date de la reunion.</li>
+    <li><strong>Montant verse :</strong> Le montant total verse au beneficiaire du tour,
+    avec le detail par categorie de cotisation.</li>
+    <li><strong>Situation de la caisse par categorie :</strong> Le montant disponible
+    dans chaque categorie de la caisse.</li>
+    <li><strong>Recapitulatif par membre :</strong> Le solde net de chaque membre
+    dans chaque categorie, avec les totaux.</li>
+    <li><strong>Retraits de la periode :</strong> Liste des retraits effectues pendant la periode.</li>
+    <li><strong>Amendes de la periode :</strong> Liste des amendes payees pendant la periode.</li>
+    <li><strong>Interets verses :</strong> Les interets distribues aux membres pour cette periode.</li>
+    <li><strong>Prets en cours :</strong> Liste des prets actifs avec le montant restant.</li>
+    <li><strong>Historique des versements :</strong> Tous les versements effectues depuis le debut.</li>
+  </ul>
+
+  <div class="tip-box">
+    <p><strong>Astuce :</strong> Generez le recapitulatif apres chaque versement pour garder
+    une trace ecrite de l'etat de la tontine a chaque reunion. Ces documents peuvent etre
+    archives et partages avec les membres absents.</p>
+  </div>
+</div>
+
+<!-- ============ 13. ADMIN RULES ============ -->
+<div class="page" id="admin">
+  <h2>13. Regles d'Administration</h2>
+
+  <h3>Roles et permissions</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:14px; margin:16px 0;">
+    <thead>
+      <tr style="background:#f8fafc;">
+        <th style="padding:10px 12px; border:1px solid #e2e8f0; text-align:left;">Action</th>
+        <th style="padding:10px 12px; border:1px solid #e2e8f0; text-align:center;">Admin principal</th>
+        <th style="padding:10px 12px; border:1px solid #e2e8f0; text-align:center;">Admin secondaire</th>
+        <th style="padding:10px 12px; border:1px solid #e2e8f0; text-align:center;">Membre</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Consulter le tableau de bord</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Enregistrer les cotisations</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Effectuer les versements</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Gerer les prets</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Appliquer des amendes</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Inviter des membres</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Nommer un admin secondaire</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0;">Transferer la tontine</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#16a34a;">Oui</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+        <td style="padding:8px 12px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">Non</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Regle d'auto-promotion</h3>
+  <div class="warning-box">
+    <p><strong>Absence prolongee :</strong> Si l'admin principal ne se connecte pas pendant
+    40 jours consecutifs, l'admin secondaire est automatiquement promu admin principal.
+    L'ancien admin principal devient membre ordinaire. Un avertissement s'affiche des 20 jours
+    d'absence pour prevenir les membres.</p>
+  </div>
+
+  <h3>Transfert de role</h3>
+  <p>
+    L'admin principal peut a tout moment transferer son role a un autre membre. Ce membre
+    devient admin principal et l'ancien devient membre ordinaire. Cette action est immediate
+    et irreversible.
+  </p>
+</div>
+
+<!-- ============ 14. FAQ ============ -->
+<div class="page" id="faq">
+  <h2>14. Questions Frequemment Posees</h2>
+
+  <h3>Que faire si le nombre de membres ne correspond pas au nombre de tours ?</h3>
+  <p>
+    Le nombre de membres doit etre exactement egal au nombre de tours calcule a partir
+    des dates et de la periodicite. Si ce n'est pas le cas, ajustez les dates de debut/fin
+    ou ajoutez/retirez des membres jusqu'a ce que les nombres correspondent.
+  </p>
+
+  <h3>Comment modifier une cotisation apres l'avoir enregistree ?</h3>
+  <p>
+    L'administrateur peut modifier une cotisation dans les 7 jours suivant la saisie.
+    Au-dela de ce delai, la modification n'est plus possible. Seules les categories
+    non-cotisation (caisse) peuvent etre modifiees.
+  </p>
+
+  <h3>Que se passe-t-il si un membre n'a pas assez de solde pour une amende sur compte ?</h3>
+  <p>
+    Si le solde du membre dans la categorie source est insuffisant, le systeme preleve
+    ce qui est disponible et le reste est considere comme paye en especes (sans debit
+    supplementaire du compte).
+  </p>
+
+  <h3>Comment sont repartis les interets des prets ?</h3>
+  <p>
+    Les interets sont distribues proportionnellement au solde de chaque membre dans la
+    categorie de destination. Si tous les membres ont le meme solde, la repartition est
+    equitable. Le systeme garantit que la somme des parts est exactement egale au montant
+    des interets.
+  </p>
+
+  <h3>Puis-je appartenir a plusieurs tontines ?</h3>
+  <p>
+    Oui, vous pouvez participer a plusieurs tontines. Utilisez le menu deroulant en haut
+    de la barre laterale pour basculer entre vos differentes tontines.
+  </p>
+
+  <h3>Que faire si une invitation a expire ?</h3>
+  <p>
+    Si une invitation a expire (apres 48 heures), vous ne pouvez plus l'accepter.
+    Contactez l'administrateur de la tontine pour qu'il vous envoie une nouvelle invitation.
+  </p>
+
+  <h3>Un admin secondaire peut-il effectuer des actions administratives ?</h3>
+  <p>
+    Non, l'admin secondaire ne dispose pas des pouvoirs administratifs. Son role est
+    uniquement de remplacer l'admin principal en cas d'absence prolongee (apres 40 jours
+    sans connexion). En attendant, il a les memes droits qu'un membre ordinaire.
+  </p>
+
+  <h3>Comment transferer la caisse a la fin d'une tontine ?</h3>
+  <p>
+    Lorsque tous les tours sont completes, une banniere bleue s'affiche sur la page
+    Versements. Cliquez sur "Transferer vers une nouvelle tontine" et suivez l'assistant
+    de transfert decrit dans la section 11.
+  </p>
+
+  <div class="footer">
+    <p>TontineApp - Guide d'Utilisation Complet - Version 1.0 - Septembre 2026</p>
+    <p>Document genere automatiquement. Pour toute question supplementaire, contactez l'administrateur de votre tontine.</p>
+  </div>
+</div>
+
+</body>
+</html>
