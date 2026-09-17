@@ -1,0 +1,2 @@
+[functions.tontine-data]
+verify_jwt = true
