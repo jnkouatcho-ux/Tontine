@@ -13,6 +13,7 @@ import {
   X,
   ChevronDown,
   Bell,
+  HelpCircle,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Profile } from '../types/database';
@@ -191,6 +192,17 @@ export default function Layout({
               </span>
             )}
           </button>
+          <div className="border-t border-slate-100 my-3" />
+          <a
+            href="/guide-utilisation.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setSidebarOpen(false)}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+          >
+            <HelpCircle className="w-5 h-5" />
+            Guide d'utilisation
+          </a>
         </nav>
       </aside>
 
