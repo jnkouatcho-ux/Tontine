@@ -101,6 +101,11 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
     { userId: profile?.id || '', username: profile?.username || '', displayName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.username || '', slotNumber: 1, excludedCategoryNames: [] },
   ]);
 
+  // Username input for adding members
+  const [usernameInput, setUsernameInput] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
+  const [addError, setAddError] = useState('');
+
   // Loan config
   const [loanCategories, setLoanCategories] = useState<string[]>([]);
   const [interestRate, setInterestRate] = useState(0);
