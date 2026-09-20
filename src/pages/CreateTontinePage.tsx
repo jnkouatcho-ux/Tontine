@@ -850,6 +850,36 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
                               Retrait en fin uniquement
                             </label>
                           </div>
+
+                          {members.filter((m) => m.slotNumber > 1 && m.userId.trim()).length > 0 && (
+                            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                              <p className="text-xs text-slate-600 font-medium mb-2">
+                Noms secondaires a exclure de cette categorie :
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {members.filter((m) => m.slotNumber > 1 && m.userId.trim()).map((m) => {
+                                  const memberIdx = members.indexOf(m);
+                                  const isExcluded = m.excludedCategoryNames.includes(cat.name);
+                                  return (
+                                    <button
+                                      key={`${m.userId}-${m.slotNumber}`}
+                                      onClick={() => toggleCategoryExclusion(memberIdx, cat.name)}
+                                      className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                                        isExcluded
+                                          ? 'bg-red-100 text-red-700 border border-red-200'
+                                          : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                      }`}
+                                    >
+                                      {m.displayName}
+                                      <span className="text-[10px] opacity-75">
+                                        {isExcluded ? '(exclu)' : '(inclus)'}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
