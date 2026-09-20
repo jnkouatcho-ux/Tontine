@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrency, generateScheduleDates } from '../lib/utils';
@@ -12,7 +12,6 @@ import {
   Check,
   Save,
   GripVertical,
-  Search,
   X,
 } from 'lucide-react';
 
@@ -22,6 +21,8 @@ interface MemberItem {
   userId: string;
   username: string;
   displayName: string;
+  slotNumber: number;
+  excludedCategoryNames: string[];
 }
 
 interface UserSearchResult {
@@ -97,14 +98,8 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
 
   // Eating order - members with search
   const [members, setMembers] = useState<MemberItem[]>([
-    { userId: profile?.id || '', username: profile?.username || '', displayName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.username || '' },
+    { userId: profile?.id || '', username: profile?.username || '', displayName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.username || '', slotNumber: 1, excludedCategoryNames: [] },
   ]);
-  const [memberSearchQuery, setMemberSearchQuery] = useState('');
-  const [memberSearchResults, setMemberSearchResults] = useState<UserSearchResult[]>([]);
-  const [memberSearching, setMemberSearching] = useState(false);
-  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
-  const memberSearchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const memberDropdownRef = useRef<HTMLDivElement>(null);
 
   // Loan config
   const [loanCategories, setLoanCategories] = useState<string[]>([]);
@@ -209,7 +204,10 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
 
   const removeMember = (index: number) => {
     if (index === 0) return;
-    setMembers(members.filter((_, i) => i !== index));
+    const removed = members[index];
+    const remaining = members.filter((_, i) => i !== index);
+    // If we removed a secondary slot, the primary stays
+    setMembers(remaining);
   };
 
   const moveMember = (from: number, to: number) => {
@@ -219,47 +217,66 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
     setMembers(newOrder);
   };
 
-  const searchUsers = async (query: string) => {
-    if (!profile || query.length < 2) {
-      setMemberSearchResults([]);
+  const addMemberByUsername = async () => {
+    const username = usernameInput.trim();
+    if (!username || !session) return;
+    if (username.length < 2) {
+      setAddError('Nom d\'utilisateur trop court');
       return;
     }
-    setMemberSearching(true);
+
+    setAddingMember(true);
+    setAddError('');
+
     try {
-      const res = await fetch(`${EF_URL}?action=search-users&q=${encodeURIComponent(query)}`, {
+      const res = await fetch(`${EF_URL}?action=lookup-username&username=${encodeURIComponent(username)}`, {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           Apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
       });
+
       const data = await res.json();
-      const existingIds = members.map((m) => m.userId);
-      const filtered = (data.users || []).filter((u: UserSearchResult) => !existingIds.includes(u.id));
-      setMemberSearchResults(filtered);
+
+      if (!res.ok) {
+        setAddError(data.error || 'Utilisateur introuvable');
+        setAddingMember(false);
+        return;
+      }
+
+      const user: UserSearchResult = data.user;
+      const displayName = `${user.first_name} ${user.last_name}`.trim() || user.username;
+
+      // Determine slot number: count existing entries for this user
+      const existingSlots = members.filter((m) => m.userId === user.id);
+      const nextSlot = existingSlots.length + 1;
+      const slotDisplayName = nextSlot > 1 ? `${displayName}_${nextSlot}` : displayName;
+
+      setMembers([...members, {
+        userId: user.id,
+        username: user.username,
+        displayName: slotDisplayName,
+        slotNumber: nextSlot,
+        excludedCategoryNames: [],
+      }]);
+      setUsernameInput('');
     } catch {
-      setMemberSearchResults([]);
+      setAddError('Erreur lors de la recherche');
     }
-    setMemberSearching(false);
+    setAddingMember(false);
   };
 
-  const handleMemberSearchInput = (value: string) => {
-    setMemberSearchQuery(value);
-    if (memberSearchTimeout.current) clearTimeout(memberSearchTimeout.current);
-    memberSearchTimeout.current = setTimeout(() => searchUsers(value), 300);
-  };
-
-  const selectMember = (user: UserSearchResult) => {
-    const displayName = `${user.first_name} ${user.last_name}`.trim() || user.username;
+  const toggleCategoryExclusion = (memberIndex: number, categoryName: string) => {
     const newMembers = [...members];
-    if (activeSearchIndex !== null && activeSearchIndex < newMembers.length) {
-      newMembers[activeSearchIndex] = { userId: user.id, username: user.username, displayName };
+    const member = newMembers[memberIndex];
+    if (!member || member.slotNumber === 1) return;
+    const isExcluded = member.excludedCategoryNames.includes(categoryName);
+    if (isExcluded) {
+      member.excludedCategoryNames = member.excludedCategoryNames.filter((c) => c !== categoryName);
     } else {
-      newMembers.push({ userId: user.id, username: user.username, displayName });
+      member.excludedCategoryNames = [...member.excludedCategoryNames, categoryName];
     }
     setMembers(newMembers);
-    setMemberSearchQuery('');
-    setMemberSearchResults([]);
-    setActiveSearchIndex(null);
   };
 
   const toggleLoanCategory = (catName: string) => {
@@ -357,6 +374,7 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
           user_id: profile.id,
           role: 'admin',
           eating_order: creatorEatingOrder,
+          slot_number: 1,
         })
         .select()
         .single();
@@ -472,6 +490,10 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
             const amt = cat.initial_amounts_per_member?.[m.userId] || 0;
             if (amt > 0) initialAmounts[catId] = amt;
           }
+          const excludedCatIds = m.excludedCategoryNames
+            .map((catName) => catNameToId[catName])
+            .filter(Boolean) as string[];
+
           return {
             tontine_id: tontine.id,
             inviter_id: profile.id,
@@ -481,6 +503,8 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
             expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
             initial_amounts: initialAmounts,
             eating_order: memberIdx >= 0 ? memberIdx + 1 : null,
+            slot_number: m.slotNumber,
+            excluded_category_ids: excludedCatIds,
           };
         });
         await supabase.from('tontine_invitations').insert(invitations);
@@ -903,74 +927,91 @@ export default function CreateTontinePage({ onCreated, onNavigate }: CreateTonti
                       </div>
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-200 rounded-lg">
-                      <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <span className="text-slate-600 font-semibold text-xs">{member.displayName[0]}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-200 rounded-lg">
+                        <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
+                          <span className="text-slate-600 font-semibold text-xs">{member.displayName[0]}</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-slate-800">{member.displayName}</p>
+                            {member.slotNumber > 1 && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">
+                                Nom_{member.slotNumber}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500">@{member.username}</p>
+                        </div>
+                        <button
+                          onClick={() => removeMember(i)}
+                          className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">{member.displayName}</p>
-                        <p className="text-xs text-slate-500">@{member.username}</p>
-                      </div>
-                      <button
-                        onClick={() => removeMember(i)}
-                        className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      {member.slotNumber > 1 && categories.filter((c) => !c.is_contribution).length > 0 && (
+                        <div className="mt-1.5 px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-lg">
+                          <p className="text-xs text-blue-700 font-medium mb-1.5">
+                            Categories dont ce nom est exclu (cotisation reste obligatoire) :
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {categories.filter((c) => !c.is_contribution).map((cat) => {
+                              const isExcluded = member.excludedCategoryNames.includes(cat.name);
+                              return (
+                                <button
+                                  key={cat.name}
+                                  onClick={() => toggleCategoryExclusion(i, cat.name)}
+                                  className={`text-xs px-2 py-1 rounded-lg font-medium transition-all ${
+                                    isExcluded
+                                      ? 'bg-red-100 text-red-700 border border-red-200'
+                                      : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                  }`}
+                                >
+                                  {cat.name} {isExcluded ? '(exclu)' : '(inclus)'}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Search input for adding new members */}
-            <div className="relative" ref={memberDropdownRef}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                value={memberSearchQuery}
-                onChange={(e) => handleMemberSearchInput(e.target.value)}
-                onFocus={() => setActiveSearchIndex(members.length)}
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
-                placeholder="Rechercher un utilisateur par nom ou username..."
-                autoComplete="off"
-              />
-
-              {memberSearchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
-                  {memberSearchResults.map((user) => {
-                    const displayName = `${user.first_name} ${user.last_name}`.trim() || user.username;
-                    return (
-                      <button
-                        key={user.id}
-                        onClick={() => selectMember(user)}
-                        className="w-full text-left px-4 py-3 hover:bg-emerald-50 flex items-center gap-3 transition-colors border-b border-slate-50 last:border-0"
-                      >
-                        <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <span className="text-slate-600 font-semibold text-sm">{displayName[0]}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800 truncate">{displayName}</p>
-                          <p className="text-xs text-slate-500 truncate">@{user.username} - {user.email}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Username input for adding new members */}
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => { setUsernameInput(e.target.value); setAddError(''); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMemberByUsername(); } }}
+                  className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+                  placeholder="Entrez le nom d'utilisateur (ex: fandio)..."
+                  autoComplete="off"
+                />
+                <button
+                  onClick={addMemberByUsername}
+                  disabled={addingMember || !usernameInput.trim()}
+                  className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-all flex items-center gap-2 whitespace-nowrap"
+                >
+                  {addingMember ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  Ajouter
+                </button>
+              </div>
+              {addError && (
+                <p className="text-sm text-red-600">{addError}</p>
               )}
-
-              {memberSearching && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-4 text-center">
-                  <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-slate-500 mt-2">Recherche en cours...</p>
-                </div>
-              )}
-
-              {memberSearchQuery.length >= 2 && memberSearchResults.length === 0 && !memberSearching && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-4 text-center">
-                  <p className="text-sm text-slate-500">Aucun utilisateur trouve</p>
-                </div>
-              )}
+              <p className="text-xs text-slate-400">
+                Saisissez le nom d'utilisateur exact. Une meme personne peut etre ajoutee plusieurs fois (ex: Fandio, Fandio_2, Fandio_3).
+              </p>
             </div>
 
             <div className="bg-slate-50 rounded-xl p-4">

@@ -119,9 +119,7 @@ export default function MembersPage({ tontineId, isAdmin }: MembersPageProps) {
         },
       });
       const data = await res.json();
-      const memberUserIds = members.map((m) => m.user_id);
-      const filtered = (data.users || []).filter((u: SearchResult) => !memberUserIds.includes(u.id));
-      setSearchResults(filtered);
+      setSearchResults(data.users || []);
     } catch {
       setSearchResults([]);
     }
@@ -327,7 +325,7 @@ export default function MembersPage({ tontineId, isAdmin }: MembersPageProps) {
               value={searchQuery}
               onChange={(e) => handleSearchInput(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
-              placeholder="Tapez un nom ou username (min. 2 caracteres)..."
+              placeholder="Tapez un nom d'utilisateur (min. 2 caracteres)..."
               autoComplete="off"
             />
 
@@ -445,12 +443,12 @@ export default function MembersPage({ tontineId, isAdmin }: MembersPageProps) {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-800">
-                      {m.profile.first_name} {m.profile.last_name}
-                      {m.profile.first_name && m.profile.last_name && (
+                      {m.display_name_override || `${m.profile.first_name} ${m.profile.last_name}`.trim() || `@${m.profile.username}`}
+                      {!m.display_name_override && m.profile.first_name && m.profile.last_name && (
                         <span className="text-slate-400 ml-1">(@{m.profile.username})</span>
                       )}
-                      {!m.profile.first_name && !m.profile.last_name && (
-                        <span>@{m.profile.username}</span>
+                      {m.slot_number > 1 && (
+                        <span className="ml-1.5 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Nom_{m.slot_number}</span>
                       )}
                     </p>
                     <p className="text-xs text-slate-500">Tour #{m.eating_order}</p>
@@ -524,8 +522,10 @@ export default function MembersPage({ tontineId, isAdmin }: MembersPageProps) {
                   return (
                     <tr key={m.id} className="hover:bg-slate-25 transition-colors">
                       <td className="px-5 py-3 font-medium text-slate-800 whitespace-nowrap">
-                        {m.profile.first_name} {m.profile.last_name}
-                        {!m.profile.first_name && !m.profile.last_name && `@${m.profile.username}`}
+                        {m.display_name_override || `${m.profile.first_name} ${m.profile.last_name}`.trim() || `@${m.profile.username}`}
+                        {m.slot_number > 1 && (
+                          <span className="ml-1.5 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Nom_{m.slot_number}</span>
+                        )}
                       </td>
                       {categories.filter((cat) => !cat.is_contribution && !cat.can_withdraw_anytime).map((cat) => {
                         const catNet = memberCategoryNet[m.id]?.[cat.id] || 0;

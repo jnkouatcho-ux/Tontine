@@ -48,6 +48,8 @@ export interface TontineMember {
   eating_order: number;
   joined_at: string;
   last_active_at: string | null;
+  slot_number: number;
+  display_name_override: string | null;
   profile?: Profile;
 }
 
@@ -60,6 +62,8 @@ export interface TontineInvitation {
   status: 'pending' | 'accepted' | 'rejected' | 'expired';
   expires_at: string;
   created_at: string;
+  slot_number: number;
+  excluded_category_ids: string[];
   tontine?: Tontine;
 }
 
@@ -202,4 +206,11 @@ export interface InterestDistribution {
   per_member_amount: number;
   distributed_at: string;
   category_id: string;
+}
+
+export interface MemberCategoryExclusion {
+  id: string;
+  member_id: string;
+  category_id: string;
+  created_at: string;
 }

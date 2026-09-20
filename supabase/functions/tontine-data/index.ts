@@ -171,6 +171,17 @@ Deno.serve(async (req: Request) => {
         serviceClient.from("interest_distributions").select("*").eq("tontine_id", tontineId),
       ]);
 
+      // Fetch category exclusions for members in this tontine
+      let exclusionsData: any[] = [];
+      if (membersRes.data && membersRes.data.length > 0) {
+        const memberIds = membersRes.data.map((m: any) => m.id);
+        const { data: exclData } = await serviceClient
+          .from("member_category_exclusions")
+          .select("*")
+          .in("member_id", memberIds);
+        exclusionsData = exclData || [];
+      }
+
       let enrichedSchedule = scheduleRes.data || [];
       if (enrichedSchedule.length > 0) {
         const userIds = [...new Set(enrichedSchedule.map((s: any) => s.user_id))];
@@ -216,6 +227,7 @@ Deno.serve(async (req: Request) => {
         invitations: invitationsRes.data,
         withdrawals: withdrawalsRes.data || [],
         interestDistributions: interestDistRes.data || [],
+        categoryExclusions: exclusionsData,
         role,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -224,16 +236,19 @@ Deno.serve(async (req: Request) => {
 
     if (action === "search-users") {
       const query = url.searchParams.get("q");
-      if (!query || query.length < 2) {
+      if (!query || query.trim().length < 2) {
         return new Response(JSON.stringify({ users: [] }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
+      const trimmed = query.trim();
+
+      // Search by username only (exact or prefix match), exclude self
       const { data: users, error: searchErr } = await serviceClient
         .from("profiles")
         .select("id, username, first_name, last_name, email")
-        .or(`username.ilike.%${query}%,first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
+        .ilike("username", `${trimmed}%`)
         .neq("id", user.id)
         .limit(10);
 
@@ -245,6 +260,42 @@ Deno.serve(async (req: Request) => {
       }
 
       return new Response(JSON.stringify({ users: users || [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "lookup-username") {
+      const username = url.searchParams.get("username");
+      if (!username || username.trim().length < 2) {
+        return new Response(JSON.stringify({ error: "Nom d'utilisateur trop court" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const trimmed = username.trim();
+
+      const { data: profile, error: lookupErr } = await serviceClient
+        .from("profiles")
+        .select("id, username, first_name, last_name, email")
+        .eq("username", trimmed)
+        .maybeSingle();
+
+      if (lookupErr) {
+        return new Response(JSON.stringify({ error: lookupErr.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!profile) {
+        return new Response(JSON.stringify({ error: `L'utilisateur "${trimmed}" n'existe pas` }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ user: profile }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -293,16 +344,18 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      // 2. Check if already a member
+      // 2. Check if already a member with the same slot_number
+      const invitedSlotNumber = (invitation as any).slot_number as number || 1;
       const { data: existingMember } = await serviceClient
         .from("tontine_members")
         .select("id")
         .eq("tontine_id", invitation.tontine_id)
         .eq("user_id", user.id)
+        .eq("slot_number", invitedSlotNumber)
         .maybeSingle();
 
       if (existingMember) {
-        // Already a member, just update invitation
+        // Already a member with this slot, just update invitation
         await serviceClient
           .from("tontine_invitations")
           .update({ status: "accepted" })
@@ -362,7 +415,16 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      // 6. Add member
+      // 6. Add member (with slot_number and display_name_override for secondary slots)
+      const displayNameOverride = invitedSlotNumber > 1
+        ? (() => {
+            // Generate display name like "Fandio_2"
+            const firstName = (invitation as any).invitee_first_name || "";
+            const baseName = (firstName || (invitation as any).invitee_username || "Membre").trim();
+            return `${baseName}_${invitedSlotNumber}`;
+          })()
+        : null;
+
       const { data: newMember, error: memberErr } = await serviceClient
         .from("tontine_members")
         .insert({
@@ -370,6 +432,8 @@ Deno.serve(async (req: Request) => {
           user_id: user.id,
           role: "member",
           eating_order: nextEatingOrder,
+          slot_number: invitedSlotNumber,
+          display_name_override: displayNameOverride,
         })
         .select()
         .single();
@@ -408,7 +472,17 @@ Deno.serve(async (req: Request) => {
         await serviceClient.from("contributions").insert(initialContribs);
       }
 
-      // 8. Update invitation status
+      // 8. Insert category exclusions for secondary slots
+      const excludedCategoryIds = (invitation as any).excluded_category_ids as string[] || [];
+      if (excludedCategoryIds.length > 0 && newMember) {
+        const exclusions = excludedCategoryIds.map((catId: string) => ({
+          member_id: newMember.id,
+          category_id: catId,
+        }));
+        await serviceClient.from("member_category_exclusions").insert(exclusions);
+      }
+
+      // 9. Update invitation status
       await serviceClient
         .from("tontine_invitations")
         .update({ status: "accepted" })
