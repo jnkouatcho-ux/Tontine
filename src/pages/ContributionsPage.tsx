@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrency, formatDate, getPeriodicityLabel, generateScheduleDates } from '../lib/utils';
-import type { Category, Contribution, TontineMember, Profile, Tontine } from '../types/database';
+import type { Category, Contribution, TontineMember, Profile, Tontine, MemberCategoryExclusion } from '../types/database';
 import { HandCoins, Plus, Check, AlertCircle, ChevronDown, ChevronRight, Calendar, Pencil, X, ArrowRightLeft } from 'lucide-react';
 
 const EF_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tontine-data`;
@@ -37,6 +37,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
   const [expandedPeriods, setExpandedPeriods] = useState<Set<string>>(new Set());
+  const [categoryExclusions, setCategoryExclusions] = useState<MemberCategoryExclusion[]>([]);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -69,6 +70,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
       if (data.contributions) setContributions(data.contributions);
       if (data.members) setMembers(data.members);
       if (data.tontine) setTontine(data.tontine);
+      if (data.categoryExclusions) setCategoryExclusions(data.categoryExclusions);
     } catch {
       // silent
     }
@@ -92,12 +94,24 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
     if (!periodDate) return members;
     const contributionCatIds = categories.filter((c) => c.is_contribution || c.can_withdraw_anytime).map((c) => c.id);
     if (contributionCatIds.length === 0) return members;
-    const alreadyPaid = new Set(
+    // Collect user_ids that have already contributed via ANY slot for this period
+    const paidUserIds = new Set(
+      contributions
+        .filter((c) => c.period_date === periodDate && contributionCatIds.includes(c.category_id))
+        .map((c) => {
+          const mem = members.find((m) => m.id === c.member_id);
+          return mem?.user_id;
+        })
+        .filter(Boolean) as string[]
+    );
+    // Also collect member_ids that have paid (for direct filtering)
+    const paidMemberIds = new Set(
       contributions
         .filter((c) => c.period_date === periodDate && contributionCatIds.includes(c.category_id))
         .map((c) => c.member_id)
     );
-    return members.filter((m) => !alreadyPaid.has(m.id));
+    // A member is available if neither their member_id nor their user_id has paid
+    return members.filter((m) => !paidMemberIds.has(m.id) && !paidUserIds.has(m.user_id));
   }, [periodDate, members, contributions, categories]);
 
   // How many members have paid for the selected period
@@ -105,12 +119,16 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
     if (!periodDate) return { paid: 0, total: members.length };
     const contributionCatIds = categories.filter((c) => c.is_contribution || c.can_withdraw_anytime).map((c) => c.id);
     if (contributionCatIds.length === 0) return { paid: 0, total: members.length };
-    const paid = new Set(
+    const paidUserIds = new Set(
       contributions
         .filter((c) => c.period_date === periodDate && contributionCatIds.includes(c.category_id))
-        .map((c) => c.member_id)
-    ).size;
-    return { paid, total: members.length };
+        .map((c) => {
+          const mem = members.find((m) => m.id === c.member_id);
+          return mem?.user_id;
+        })
+        .filter(Boolean) as string[]
+    );
+    return { paid: paidUserIds.size, total: new Set(members.map((m) => m.user_id)).size };
   }, [periodDate, members, contributions, categories]);
 
   const periodGroups = useMemo(() => {
@@ -216,12 +234,40 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
     }
   };
 
+  const isCategoryExcludedForMember = (memberId: string, categoryId: string): boolean => {
+    return categoryExclusions.some((e) => e.member_id === memberId && e.category_id === categoryId);
+  };
+
+  const selectedMemberExcludedCategoryIds = useMemo(() => {
+    if (!selectedMember) return new Set<string>();
+    return new Set(
+      categoryExclusions
+        .filter((e) => e.member_id === selectedMember)
+        .map((e) => e.category_id)
+    );
+  }, [selectedMember, categoryExclusions]);
+
+  const visibleCategories = useMemo(() => {
+    if (!selectedMember) return categories;
+    return categories.filter((cat) => {
+      if (cat.is_contribution || cat.can_withdraw_anytime) return true;
+      return !selectedMemberExcludedCategoryIds.has(cat.id);
+    });
+  }, [categories, selectedMember, selectedMemberExcludedCategoryIds]);
+
   const handleAddContribution = async () => {
     if (!profile || !selectedMember) return;
     setSaveError('');
     setSaveSuccess('');
 
-    for (const cat of categories) {
+    const catsToSave = categories.filter((cat) => {
+      if (!cat.is_contribution && !cat.can_withdraw_anytime && isCategoryExcludedForMember(selectedMember, cat.id)) {
+        return false;
+      }
+      return true;
+    });
+
+    for (const cat of catsToSave) {
       const amount = categoryAmounts[cat.id] || 0;
       if (amount <= 0) continue;
       if (cat.is_contribution && amount !== cat.amount) {
@@ -251,7 +297,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
       return;
     }
 
-    const records = categories
+    const records = catsToSave
       .filter((cat) => (categoryAmounts[cat.id] || 0) > 0)
       .map((cat) => ({
         tontine_id: tontineId,
@@ -397,7 +443,9 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
                   <option value="">Selectionner un membre</option>
                   {availableMembers.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.profile.first_name} {m.profile.last_name} (@{m.profile.username})
+                      {m.display_name_override
+                        ? m.display_name_override
+                        : `${m.profile.first_name} ${m.profile.last_name} (@${m.profile.username})`}
                     </option>
                   ))}
                 </select>
@@ -407,7 +455,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
 
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-slate-700">Montants par categorie</h4>
-            {categories.map((cat) => {
+            {visibleCategories.map((cat) => {
               const isLocked = cat.is_contribution || cat.can_withdraw_anytime || cat.amount_type === 'fixed';
               const amount = categoryAmounts[cat.id] || 0;
               return (
@@ -454,7 +502,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
           <div className="flex items-center justify-between px-3 py-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
             <span className="text-sm font-medium text-emerald-800">Total</span>
             <span className="text-lg font-bold text-emerald-900 font-mono">
-              {formatCurrency(categories.reduce((sum, cat) => sum + (categoryAmounts[cat.id] || 0), 0))}
+              {formatCurrency(visibleCategories.reduce((sum, cat) => sum + (categoryAmounts[cat.id] || 0), 0))}
             </span>
           </div>
 
@@ -481,7 +529,7 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     <option value="">Selectionner</option>
-                    {categories.filter((c) => c.is_in_cash_box && !c.is_contribution).map((cat) => (
+                    {visibleCategories.filter((c) => c.is_in_cash_box && !c.is_contribution).map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
@@ -569,8 +617,9 @@ export default function ContributionsPage({ tontineId, isAdmin }: ContributionsP
                             return (
                               <tr key={m.id} className="hover:bg-slate-25 transition-colors">
                                 <td className="px-5 py-2.5 font-medium text-slate-800 whitespace-nowrap text-sm">
-                                  {m.profile.first_name} {m.profile.last_name}
-                                  {!m.profile.first_name && !m.profile.last_name && `@${m.profile.username}`}
+                                  {m.display_name_override
+                                    ? m.display_name_override
+                                    : `${m.profile.first_name} ${m.profile.last_name}`.trim() || `@${m.profile.username}`}
                                 </td>
                                 {categories.map((cat) => {
                                   const contrib = memberContribs.find((c) => c.category_id === cat.id);
