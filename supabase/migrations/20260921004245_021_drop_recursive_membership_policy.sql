@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Tontine members can read membership" ON tontine_members;
